@@ -1380,27 +1380,60 @@
     }
 
     /* ── Waitlist forms ───────────────────────────────────── */
-    function handleWaitlist(formId, onSuccess) {
+    const SUPABASE_URL  = 'https://udsubvqvelintizxxlja.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkc3VidnF2ZWxpbnRpenh4bGphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MTQ5ODMsImV4cCI6MjA5ODE5MDk4M30.7Vt1gYOqFfgT-TzrZDJLOqfO7ryYZKGXYd1M9H3EiJc';
+
+    async function submitToWaitlist(email, source) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ email, source }),
+      });
+      if (!res.ok && res.status !== 409) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      // 409 = duplicate email, treat as success (already signed up)
+    }
+
+    function handleWaitlist(formId, source, onSuccess) {
       const form = document.getElementById(formId);
       if (!form) return;
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = form.querySelector('input[type="email"]').value.trim();
+        const input  = form.querySelector('input[type="email"]');
+        const btn    = form.querySelector('button');
+        const email  = input.value.trim();
         if (!email) return;
 
-        // In production: POST to your backend/Supabase
-        // For now, log and show success
-        console.log('Waitlist signup:', email);
-        onSuccess();
+        btn.disabled = true;
+        btn.textContent = 'Joining…';
+
+        try {
+          await submitToWaitlist(email, source);
+          onSuccess();
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = 'Try Again';
+          input.style.borderColor = '#EF4444';
+          setTimeout(() => {
+            btn.textContent = 'Get Early Access';
+            input.style.borderColor = '';
+          }, 3000);
+        }
       });
     }
 
-    handleWaitlist('hero-waitlist', () => {
+    handleWaitlist('hero-waitlist', 'hero', () => {
       const form = document.getElementById('hero-waitlist');
       form.innerHTML = '<p style="color: var(--emerald); font-family: var(--ff-mono); font-size:13px; letter-spacing:.08em;">✓ You\'re on the list. We\'ll be in touch.</p>';
     });
 
-    handleWaitlist('cta-waitlist', () => {
+    handleWaitlist('cta-waitlist', 'cta', () => {
       document.getElementById('cta-forms-wrap').style.display = 'none';
       const msg = document.getElementById('success-msg');
       msg.classList.add('show');
