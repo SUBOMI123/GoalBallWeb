@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoalBall — Your AI Football Coach</title>
+  <meta name="description" content="GoalBall is your personal AI football coach. Personalized training plans, real-time technique analysis, and a Player Card that levels up with every session. Coming to iOS.">
+  <meta property="og:title" content="GoalBall — Your AI Football Coach">
+  <meta property="og:description" content="Train with an AI coach that watches every touch, reads your form, and builds a plan around you. Coming to iOS.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Variables ──────────────────────────────────────────── */
+    :root {
+      --pitch-dark:   #060F08;
+      --pitch-mid:    #0C1A0E;
+      --pitch-card:   #112214;
+      --pitch-border: rgba(237,245,232,0.08);
+      --chalk:        #EDF5E8;
+      --chalk-dim:    rgba(237,245,232,0.55);
+      --chalk-ghost:  rgba(237,245,232,0.12);
+      --electric:     #3B7AFC;
+      --electric-bg:  rgba(59,122,252,0.12);
+      --electric-dim: rgba(59,122,252,0.3);
+      --gold:         #F5C24B;
+      --gold-dark:    #B8902A;
+      --emerald:      #4ADE80;
+      --ff-display:   'Bebas Neue', 'Arial Narrow', sans-serif;
+      --ff-body:      'Inter', system-ui, sans-serif;
+      --ff-mono:      'DM Mono', 'Courier New', monospace;
+    }
+
+    /* ── Reset ──────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--pitch-dark);
+      color: var(--chalk);
+      font-family: var(--ff-body);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    section { overflow: hidden; }
+
+    .eyebrow {
+      display: inline-block;
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--electric);
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-family: var(--ff-display);
+      font-size: clamp(48px, 6vw, 80px);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+      text-wrap: balance;
+      color: var(--chalk);
+    }
+
+    /* ── Nav ────────────────────────────────────────────────── */
+    #nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      padding: 22px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.35s, border-color 0.35s, backdrop-filter 0.35s;
+      border-bottom: 1px solid transparent;
+    }
+
+    #nav.scrolled {
+      background: rgba(6,15,8,0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom-color: var(--pitch-border);
+    }
+
+    .nav-logo {
+      font-family: var(--ff-display);
+      font-size: 26px;
+      letter-spacing: 0.05em;
+      color: var(--chalk);
+    }
+    .nav-logo em { font-style: normal; color: var(--electric); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--chalk-dim);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--chalk); }
+
+    .nav-cta {
+      padding: 10px 22px;
+      background: var(--electric);
+      color: #fff !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      border-radius: 7px;
+      transition: background 0.2s, opacity 0.2s !important;
+    }
+    .nav-cta:hover { background: #5591ff; color: #fff !important; }
+
+    /* ── Hero ───────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100svh;
+      min-height: 620px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #hero-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(6,15,8,0.25) 0%,
+        rgba(6,15,8,0.4)  55%,
+        rgba(6,15,8,0.97) 100%
+      );
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 860px;
+      padding: 0 24px;
+      padding-top: 80px;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--electric);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: riseUp 0.7s 0.6s ease both;
+    }
+
+    .hero-title {
+      font-family: var(--ff-display);
+      font-size: clamp(68px, 12vw, 148px);
+      line-height: 0.9;
+      letter-spacing: 0.015em;
+      color: var(--chalk);
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: riseUp 0.8s 0.85s ease both;
+    }
+
+    .hero-title .accent { color: var(--electric); }
+
+    .hero-body {
+      font-size: clamp(16px, 2vw, 19px);
+      line-height: 1.7;
+      color: var(--chalk-dim);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      opacity: 0;
+      animation: riseUp 0.7s 1.1s ease both;
+    }
+
+    .hero-form {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: riseUp 0.7s 1.3s ease both;
+    }
+
+    .hero-form input[type="email"] {
+      padding: 15px 20px;
+      width: 280px;
+      background: rgba(237,245,232,0.07);
+      border: 1px solid rgba(237,245,232,0.18);
+      border-radius: 8px;
+      color: var(--chalk);
+      font-family: var(--ff-body);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .hero-form input[type="email"]::placeholder { color: var(--chalk-dim); }
+    .hero-form input[type="email"]:focus {
+      border-color: var(--electric);
+      background: rgba(59,122,252,0.07);
+    }
+
+    .btn-primary {
+      padding: 15px 28px;
+      background: var(--electric);
+      color: #fff;
+      font-family: var(--ff-body);
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.12s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover { background: #5591ff; }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:focus-visible { outline: 2px solid var(--electric); outline-offset: 2px; }
+
+    .hero-note {
+      margin-top: 18px;
+      font-family: var(--ff-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--chalk-ghost);
+      opacity: 0;
+      animation: riseUp 0.7s 1.5s ease both;
+    }
+
+    /* ── How it works ───────────────────────────────────────── */
+    .how-section {
+      background: var(--pitch-mid);
+      padding: 120px 0;
+    }
+
+    .how-header {
+      margin-bottom: 80px;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+    }
+
+    .step {
+      padding: 48px 40px;
+      border-top: 1px solid var(--pitch-border);
+      position: relative;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .step.visible { opacity: 1; transform: translateY(0); }
+    .step:not(:last-child) { border-right: 1px solid var(--pitch-border); }
+
+    .step-num {
+      display: block;
+      font-family: var(--ff-display);
+      font-size: 100px;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      color: var(--pitch-border);
+      margin-bottom: 24px;
+      user-select: none;
+    }
+
+    .step h3 {
+      font-family: var(--ff-display);
+      font-size: 36px;
+      letter-spacing: 0.05em;
+      color: var(--chalk);
+      margin-bottom: 14px;
+    }
+
+    .step p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--chalk-dim);
+    }
+
+    .step-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      background: var(--electric-bg);
+      border: 1px solid var(--electric-dim);
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .step-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--electric);
+      stroke-width: 1.8;
+      fill: none;
+    }
+
+    /* ── Player Card Section ────────────────────────────────── */
+    .card-section {
+      background: var(--pitch-dark);
+      padding: 140px 0;
+    }
+
+    .card-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .card-copy {
+      opacity: 0;
+      transform: translateX(-24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .card-copy.visible { opacity: 1; transform: translateX(0); }
+
+    .card-copy .section-title { margin-bottom: 24px; }
+
+    .card-copy p {
+      font-size: 17px;
+      line-height: 1.75;
+      color: var(--chalk-dim);
+      margin-bottom: 16px;
+    }
+
+    .card-copy p:last-child { margin-bottom: 0; }
+
+    .card-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(245,194,75,0.1);
+      border: 1px solid rgba(245,194,75,0.3);
+      border-radius: 100px;
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      margin-top: 32px;
+    }
+    .card-pill::before { content: '★'; font-size: 10px; }
+
+    .card-display {
+      display: flex;
+      justify-content: center;
+      opacity: 0;
+      transform: translateX(24px) translateY(10px);
+      transition: opacity 0.7s 0.15s ease, transform 0.7s 0.15s ease;
+    }
+    .card-display.visible { opacity: 1; transform: translateX(0) translateY(0); }
+
+    /* ── FIFA-style player card ─────────────────────────────── */
+    .fifa-card-wrap {
+      perspective: 800px;
+    }
+
+    .fifa-card {
+      position: relative;
+      width: 280px;
+      min-height: 420px;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,194,75,0.25);
+    }
+
+    .fifa-card-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        155deg,
+        #8a6a1a 0%,
+        #c8971e 18%,
+        #f5c24b 38%,
+        #ffe08a 52%,
+        #f5c24b 66%,
+        #c8971e 84%,
+        #8a6a1a 100%
+      );
+    }
+
+    .fifa-card-shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        115deg,
+        transparent 28%,
+        rgba(255,255,255,0.28) 50%,
+        transparent 72%
+      );
+      background-size: 200% 100%;
+      animation: cardShimmer 3.5s ease-in-out infinite;
+    }
+
+    @keyframes cardShimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .fifa-card-inner {
+      position: relative;
+      z-index: 2;
+      padding: 24px 22px 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+
+    .card-rating-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card-rating {
+      font-family: var(--ff-display);
+      font-size: 54px;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      color: #1a0e00;
+    }
+
+    .card-pos {
+      font-family: var(--ff-display);
+      font-size: 18px;
+      letter-spacing: 0.12em;
+      color: #1a0e00;
+      line-height: 1;
+    }
+
+    .card-meta {
+      text-align: right;
+    }
+
+    .card-app-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: rgba(26,14,0,0.2);
+      border-radius: 8px;
+      font-family: var(--ff-display);
+      font-size: 14px;
+      letter-spacing: 0.05em;
+      color: #1a0e00;
+    }
+
+    .card-avatar-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 0;
+    }
+
+    .card-avatar {
+      width: 110px;
+      height: 110px;
+      background: linear-gradient(135deg, #2a5ad4, #1a3aa0);
+      clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--ff-display);
+      font-size: 36px;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.95);
+      box-shadow: inset 0 -4px 12px rgba(0,0,0,0.25);
+    }
+
+    .card-player-name {
+      text-align: center;
+      font-family: var(--ff-display);
+      font-size: 22px;
+      letter-spacing: 0.18em;
+      color: #1a0e00;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(26,14,0,0.2);
+    }
+
+    .card-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px 12px;
+    }
+
+    .card-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .card-stat-val {
+      font-family: var(--ff-display);
+      font-size: 22px;
+      letter-spacing: 0.04em;
+      color: #1a0e00;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-stat-label {
+      font-family: var(--ff-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: rgba(26,14,0,0.65);
+      text-transform: uppercase;
+    }
+
+    /* ── Training Library ───────────────────────────────────── */
+    .library-section {
+      background: var(--pitch-mid);
+      padding: 120px 0;
+    }
+
+    .library-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 60px;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .library-header-text .section-title { margin-bottom: 0; }
+
+    .library-desc {
+      max-width: 340px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--chalk-dim);
+    }
+
+    .drills-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+    }
+
+    .drill-card {
+      background: var(--pitch-card);
+      padding: 32px 28px;
+      border: 1px solid var(--pitch-border);
+      transition: background 0.25s, border-color 0.25s;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease, background 0.25s, border-color 0.25s;
+    }
+
+    .drill-card.visible { opacity: 1; transform: translateY(0); }
+    .drill-card:hover {
+      background: rgba(59,122,252,0.05);
+      border-color: var(--electric-dim);
+    }
+
+    .drill-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .drill-name {
+      font-family: var(--ff-display);
+      font-size: 22px;
+      letter-spacing: 0.04em;
+      color: var(--chalk);
+      margin-bottom: 8px;
+    }
+
+    .drill-desc {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--chalk-dim);
+    }
+
+    /* ── CTA Section ────────────────────────────────────────── */
+    .cta-section {
+      background: var(--pitch-dark);
+      padding: 140px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 600px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--electric-dim), transparent);
+    }
+
+    .cta-section .section-title {
+      font-size: clamp(56px, 8vw, 100px);
+      margin-bottom: 20px;
+    }
+
+    .cta-section p {
+      font-size: 18px;
+      color: var(--chalk-dim);
+      margin-bottom: 48px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-form {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .cta-form input[type="email"] {
+      padding: 16px 22px;
+      width: 300px;
+      background: rgba(237,245,232,0.06);
+      border: 1px solid rgba(237,245,232,0.16);
+      border-radius: 8px;
+      color: var(--chalk);
+      font-family: var(--ff-body);
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .cta-form input[type="email"]::placeholder { color: var(--chalk-dim); }
+    .cta-form input[type="email"]:focus {
+      border-color: var(--electric);
+      background: rgba(59,122,252,0.06);
+    }
+
+    .cta-platforms {
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      color: var(--chalk-ghost);
+    }
+
+    .success-msg {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .success-msg.show { display: flex; }
+
+    .success-checkmark {
+      width: 56px;
+      height: 56px;
+      background: rgba(74, 222, 128, 0.12);
+      border: 1px solid rgba(74, 222, 128, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .success-text {
+      font-size: 17px;
+      color: var(--chalk);
+      font-weight: 500;
+    }
+
+    .success-sub {
+      font-size: 14px;
+      color: var(--chalk-dim);
+    }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    footer {
+      background: var(--pitch-dark);
+      border-top: 1px solid var(--pitch-border);
+      padding: 40px 0;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-logo {
+      font-family: var(--ff-display);
+      font-size: 22px;
+      letter-spacing: 0.05em;
+      color: var(--chalk);
+    }
+    .footer-logo em { font-style: normal; color: var(--electric); }
+
+    .footer-links {
+      display: flex;
+      gap: 28px;
+    }
+
+    .footer-links a {
+      font-size: 13px;
+      color: var(--chalk-dim);
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--chalk); }
+
+    .footer-tagline {
+      font-family: var(--ff-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--chalk-ghost);
+    }
+
+    /* ── Keyframes ──────────────────────────────────────────── */
+    @keyframes riseUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .container { padding: 0 24px; }
+      #nav { padding: 18px 24px; }
+      .nav-links { display: none; }
+
+      .steps-grid {
+        grid-template-columns: 1fr;
+      }
+      .step:not(:last-child) {
+        border-right: none;
+        border-bottom: 1px solid var(--pitch-border);
+      }
+      .step { padding: 36px 24px; }
+
+      .card-layout {
+        grid-template-columns: 1fr;
+        gap: 56px;
+        text-align: center;
+      }
+      .card-copy { transform: none; }
+      .card-display { transform: none; }
+
+      .drills-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .library-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .library-desc { max-width: 100%; }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .hero-form { flex-direction: column; align-items: center; }
+      .hero-form input[type="email"] { width: 100%; }
+      .drills-grid { grid-template-columns: 1fr; }
+      .cta-form { flex-direction: column; align-items: center; }
+      .cta-form input[type="email"] { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Nav ─────────────────────────────────────────────── -->
+  <nav id="nav" role="navigation" aria-label="Main navigation">
+    <a href="#" class="nav-logo" aria-label="GoalBall home">GOAL<em>BALL</em></a>
+    <div class="nav-links">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#player-card">Player Card</a>
+      <a href="#training">Training</a>
+      <a href="#early-access" class="nav-cta">Get Early Access</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ────────────────────────────────────────────── -->
+  <section class="hero" aria-label="Hero">
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
+    <div class="hero-overlay" aria-hidden="true"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">AI Football Coaching · Coming to iOS</p>
+      <h1 class="hero-title">
+        BECOME THE<br>PLAYER YOU<br><span class="accent">KNOW</span> YOU<br>CAN BE.
+      </h1>
+      <p class="hero-body">
+        GoalBall is the AI coach that watches every touch, reads your technique,
+        and builds a personalized training plan that grows with your game.
+      </p>
+      <form class="hero-form" id="hero-waitlist" novalidate>
+        <input type="email" placeholder="Enter your email" aria-label="Email address" required>
+        <button type="submit" class="btn-primary">Get Early Access</button>
+      </form>
+      <p class="hero-note">Free to start &nbsp;·&nbsp; No spam &nbsp;·&nbsp; Unsubscribe anytime</p>
+    </div>
+  </section>
+
+  <!-- ── How It Works ─────────────────────────────────────── -->
+  <section class="how-section" id="how-it-works">
+    <div class="container">
+      <div class="how-header">
+        <span class="eyebrow">The Process</span>
+        <h2 class="section-title">YOUR COACH IN<br>YOUR CORNER,<br>EVERY REP.</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step" data-delay="0">
+          <div class="step-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="3"/>
+              <line x1="12" y1="2" x2="12" y2="5"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+              <line x1="2" y1="12" x2="5" y2="12"/>
+              <line x1="19" y1="12" x2="22" y2="12"/>
+            </svg>
+          </div>
+          <span class="step-num" aria-hidden="true">01</span>
+          <h3>Record</h3>
+          <p>Set up your phone, pick a drill from your personalized plan, and get to work. GoalBall watches your movement through the camera — no sensors, no wearables needed.</p>
+        </div>
+        <div class="step" data-delay="100">
+          <div class="step-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+          </div>
+          <span class="step-num" aria-hidden="true">02</span>
+          <h3>Analyze</h3>
+          <p>On-device AI reads your body position, ball contact, and movement patterns frame by frame — the same way a real coach watches from the touchline, but after every single rep.</p>
+        </div>
+        <div class="step" data-delay="200">
+          <div class="step-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <span class="step-num" aria-hidden="true">03</span>
+          <h3>Level Up</h3>
+          <p>Receive grounded coaching notes, unlock harder drills as you improve, and watch your Player Card attributes climb. Every session pushes your overall rating forward.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Player Card Section ───────────────────────────────── -->
+  <section class="card-section" id="player-card">
+    <div class="container">
+      <div class="card-layout">
+        <div class="card-copy">
+          <span class="eyebrow">Your Progression</span>
+          <h2 class="section-title">YOUR CARD.<br>YOUR STORY.</h2>
+          <p>
+            As you train, GoalBall builds your Player Card — a live record of eight real attributes: Ball Control, First Touch, Passing, Dribbling, Shooting, Weak Foot, Pace, and Agility.
+          </p>
+          <p>
+            Every drill you complete feeds into the card. Watch your overall rating climb from first session to match-ready. Your numbers are earned, not estimated.
+          </p>
+          <span class="card-pill">Grows with every session</span>
+        </div>
+        <div class="card-display">
+          <div class="fifa-card-wrap">
+            <div class="fifa-card" id="player-card-el" role="img" aria-label="GoalBall Player Card showing attributes and overall rating">
+              <div class="fifa-card-bg"></div>
+              <div class="fifa-card-shimmer" aria-hidden="true"></div>
+              <div class="fifa-card-inner">
+                <div class="card-top">
+                  <div class="card-rating-block">
+                    <span class="card-rating" id="rating-counter">0</span>
+                    <span class="card-pos">CAM</span>
+                  </div>
+                  <div class="card-meta">
+                    <div class="card-app-badge">GB</div>
+                  </div>
+                </div>
+                <div class="card-avatar-area">
+                  <div class="card-avatar" aria-hidden="true">GB</div>
+                </div>
+                <div class="card-player-name">GOALBALL PLAYER</div>
+                <div class="card-stats-grid">
+                  <div class="card-stat">
+                    <span class="card-stat-val" data-target="75">0</span>
+                    <span class="card-stat-label">CTL</span>
+                  </div>
+                  <div class="card-stat">
+                    <span class="card-stat-val" data-target="68">0</span>
+                    <span class="card-stat-label">1ST</span>
+                  </div>
+                  <div class="card-stat">
+                    <span class="card-stat-val" data-target="73">0</span>
+                    <span class="card-stat-label">DRI</span>
+                  </div>
+                  <div class="card-stat">
+                    <span class="card-stat-val" data-target="63">0</span>
+                    <span class="card-stat-label">PAS</span>
+                  </div>
+                  <div class="card-stat">
+                    <span class="card-stat-val" data-target="70">0</span>
+                    <span class="card-stat-label">SHO</span>
+                  </div>
+                  <div class="card-stat">
+                    <span class="card-stat-val" data-target="72">0</span>
+                    <span class="card-stat-label">PAC</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Training Library ──────────────────────────────────── -->
+  <section class="library-section" id="training">
+    <div class="container">
+      <div class="library-header">
+        <div class="library-header-text">
+          <span class="eyebrow">8 Disciplines</span>
+          <h2 class="section-title">EVERY SKILL.<br>ONE COACH.</h2>
+        </div>
+        <p class="library-desc">
+          Structured programs from beginner to club level, built around drills used by top academies — with YouTube creator content woven into every session.
+        </p>
+      </div>
+      <div class="drills-grid" role="list">
+        <div class="drill-card" role="listitem" data-delay="0">
+          <span class="drill-icon" aria-hidden="true">🎯</span>
+          <h3 class="drill-name">Ball Control</h3>
+          <p class="drill-desc">Master close touches, sole rolls, and first-time control under pressure.</p>
+        </div>
+        <div class="drill-card" role="listitem" data-delay="60">
+          <span class="drill-icon" aria-hidden="true">🦶</span>
+          <h3 class="drill-name">First Touch</h3>
+          <p class="drill-desc">Cushion and redirect the ball cleanly, even when it arrives fast or awkward.</p>
+        </div>
+        <div class="drill-card" role="listitem" data-delay="120">
+          <span class="drill-icon" aria-hidden="true">↗️</span>
+          <h3 class="drill-name">Passing</h3>
+          <p class="drill-desc">Sharp weight, accuracy, and receiving — the foundation of every build-up.</p>
+        </div>
+        <div class="drill-card" role="listitem" data-delay="180">
+          <span class="drill-icon" aria-hidden="true">🌀</span>
+          <h3 class="drill-name">Dribbling</h3>
+          <p class="drill-desc">Beat defenders, cone sequences, and pace changes to go past anyone.</p>
+        </div>
+        <div class="drill-card" role="listitem" data-delay="0">
+          <span class="drill-icon" aria-hidden="true">⚡</span>
+          <h3 class="drill-name">Shooting</h3>
+          <p class="drill-desc">Strike technique, placement, and composure when it matters most.</p>
+        </div>
+        <div class="drill-card" role="listitem" data-delay="60">
+          <span class="drill-icon" aria-hidden="true">🔄</span>
+          <h3 class="drill-name">Weak Foot</h3>
+          <p class="drill-desc">Develop your less-dominant foot until both feet are a weapon.</p>
+        </div>
+        <div class="drill-card" role="listitem" data-delay="120">
+          <span class="drill-icon" aria-hidden="true">🏃</span>
+          <h3 class="drill-name">Fitness & Agility</h3>
+          <p class="drill-desc">Footwork ladders, speed work, and ball-at-feet conditioning.</p>
+        </div>
+        <div class="drill-card" role="listitem" data-delay="180">
+          <span class="drill-icon" aria-hidden="true">🧠</span>
+          <h3 class="drill-name">Match Skills</h3>
+          <p class="drill-desc">Scanning, movement off the ball, and the game patterns pros rely on.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Download CTA ──────────────────────────────────────── -->
+  <section class="cta-section" id="early-access">
+    <div class="container">
+      <span class="eyebrow">Be First On The Pitch</span>
+      <h2 class="section-title">READY TO<br>START?</h2>
+      <p>Join the early access list. We'll reach out when GoalBall is ready to download.</p>
+
+      <div id="cta-forms-wrap">
+        <form class="cta-form" id="cta-waitlist" novalidate>
+          <input type="email" placeholder="Your email address" aria-label="Email address" required>
+          <button type="submit" class="btn-primary">Notify Me at Launch</button>
+        </form>
+        <p class="cta-platforms">iPhone · iPad · Free to start</p>
+      </div>
+
+      <div class="success-msg" id="success-msg" role="status" aria-live="polite">
+        <div class="success-checkmark" aria-hidden="true">✓</div>
+        <span class="success-text">You're on the list.</span>
+        <span class="success-sub">We'll reach out the moment GoalBall drops.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ───────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <span class="footer-logo">GOAL<em>BALL</em></span>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="mailto:support@goalball.app">Contact</a>
+        </nav>
+        <span class="footer-tagline">Made for players. Powered by AI.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ── Nav scroll behavior ──────────────────────────────── */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    }, { passive: true });
+
+    /* ── Hero Canvas Animation ────────────────────────────── */
+    (function() {
+      const canvas = document.getElementById('hero-canvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, startTime = null;
+      let ballX = 0, ballY = 0, ballSpin = 0;
+      const BALL_R = 26;
+
+      function resize() {
+        W = canvas.width  = canvas.offsetWidth;
+        H = canvas.height = canvas.offsetHeight;
+      }
+
+      function lerp(a, b, t) { return a + (b - a) * t; }
+      function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
+      function drawBackground() {
+        ctx.fillStyle = '#060F08';
+        ctx.fillRect(0, 0, W, H);
+
+        // Alternating turf stripes
+        const count = Math.ceil(W / 90) + 1;
+        const sw = W / count;
+        for (let i = 0; i < count; i++) {
+          ctx.fillStyle = i % 2 === 0 ? '#060F08' : '#09160B';
+          ctx.fillRect(i * sw, 0, sw, H);
+        }
+      }
+
+      function drawLines(progress) {
+        const cx = W / 2, cy = H / 2;
+        const R = Math.min(W, H) * 0.21;
+
+        ctx.save();
+        ctx.lineCap = 'round';
+
+        // Center circle
+        const circleP = Math.min(1, progress / 0.6);
+        if (circleP > 0) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * circleP);
+          ctx.strokeStyle = 'rgba(237,245,232,0.65)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        // Center spot
+        if (progress > 0.45) {
+          const a = Math.min(1, (progress - 0.45) / 0.2);
+          ctx.beginPath();
+          ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(237,245,232,${0.65 * a})`;
+          ctx.fill();
+        }
+
+        // Halfway line
+        const lineP = Math.max(0, Math.min(1, (progress - 0.28) / 0.45));
+        if (lineP > 0) {
+          ctx.beginPath();
+          ctx.moveTo(cx - W * 0.49 * lineP, cy);
+          ctx.lineTo(cx + W * 0.49 * lineP, cy);
+          ctx.strokeStyle = 'rgba(237,245,232,0.4)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+
+        // Penalty boxes (top and bottom)
+        const boxP = Math.max(0, Math.min(1, (progress - 0.6) / 0.4));
+        if (boxP > 0) {
+          const bw = Math.min(W * 0.36, 300);
+          const bh = H * 0.19;
+          const bx = cx - bw / 2;
+          ctx.strokeStyle = 'rgba(237,245,232,0.28)';
+          ctx.lineWidth = 1.5;
+
+          // Top box
+          ctx.beginPath();
+          ctx.moveTo(bx, 0);
+          ctx.lineTo(bx, bh * boxP);
+          ctx.moveTo(bx + bw, 0);
+          ctx.lineTo(bx + bw, bh * boxP);
+          ctx.moveTo(bx, bh * boxP);
+          ctx.lineTo(bx + bw, bh * boxP);
+          ctx.stroke();
+
+          // Bottom box
+          ctx.beginPath();
+          ctx.moveTo(bx, H);
+          ctx.lineTo(bx, H - bh * boxP);
+          ctx.moveTo(bx + bw, H);
+          ctx.lineTo(bx + bw, H - bh * boxP);
+          ctx.moveTo(bx, H - bh * boxP);
+          ctx.lineTo(bx + bw, H - bh * boxP);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      function pentagon(cx, cy, r, rot) {
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const a = rot + (i / 5) * Math.PI * 2 - Math.PI / 2;
+          const x = cx + Math.cos(a) * r;
+          const y = cy + Math.sin(a) * r;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+      }
+
+      function drawBall(x, y, spin) {
+        const r = BALL_R;
+        ctx.save();
+
+        // Drop shadow
+        const shadowGrad = ctx.createRadialGradient(x, y + r * 0.85, 0, x, y + r * 0.85, r * 1.4);
+        shadowGrad.addColorStop(0, 'rgba(0,0,0,0.55)');
+        shadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = shadowGrad;
+        ctx.beginPath();
+        ctx.ellipse(x, y + r * 0.7, r * 1.15, r * 0.45, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ball body
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        const bodyGrad = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 0, x, y, r);
+        bodyGrad.addColorStop(0, '#FFFFFF');
+        bodyGrad.addColorStop(0.45, '#E6E6E6');
+        bodyGrad.addColorStop(1, '#9A9A9A');
+        ctx.fillStyle = bodyGrad;
+        ctx.fill();
+
+        // Pentagon patches (clipped to ball)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.fillStyle = '#1A1A1A';
+
+        pentagon(x, y, r * 0.33, spin);
+        ctx.fill();
+
+        for (let i = 0; i < 5; i++) {
+          const a = spin + (i / 5) * Math.PI * 2;
+          const px = x + Math.cos(a) * r * 0.67;
+          const py = y + Math.sin(a) * r * 0.67;
+          pentagon(px, py, r * 0.28, a + Math.PI / 10);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        // Highlight
+        ctx.beginPath();
+        ctx.ellipse(x - r * 0.27, y - r * 0.27, r * 0.2, r * 0.13, -Math.PI / 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.42)';
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      function drawVignette() {
+        const vg = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*0.08, W/2, H/2, Math.max(W,H)*0.85);
+        vg.addColorStop(0, 'rgba(6,15,8,0)');
+        vg.addColorStop(0.55, 'rgba(6,15,8,0.15)');
+        vg.addColorStop(1, 'rgba(6,15,8,0.9)');
+        ctx.fillStyle = vg;
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      // Stadium light glow (top-center)
+      function drawLight() {
+        const lg = ctx.createRadialGradient(W/2, -H*0.3, 0, W/2, -H*0.3, H*1.2);
+        lg.addColorStop(0, 'rgba(255,255,220,0.035)');
+        lg.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = lg;
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      let animFrame;
+      function render(ts) {
+        if (!startTime) startTime = ts;
+        const elapsed = (ts - startTime) / 1000;
+
+        drawBackground();
+        drawLight();
+
+        const lineProgress = Math.min(1, elapsed / 2.8);
+        drawLines(lineProgress);
+
+        // Ball rolls in from bottom-left corner, arrives at center
+        const BALL_DELAY    = 0.35;
+        const BALL_DURATION = 1.9;
+
+        if (elapsed > BALL_DELAY) {
+          const t = Math.min(1, (elapsed - BALL_DELAY) / BALL_DURATION);
+          const eased = easeOutQuart(t);
+
+          const startX = W * 0.12, startY = H * 0.88;
+          const endX = W * 0.5, endY = H * 0.5;
+
+          if (t < 1) {
+            ballX = lerp(startX, endX, eased);
+            ballY = lerp(startY, endY, eased);
+            ballSpin += (1 - eased) * 0.14;
+          } else {
+            const idle = elapsed - BALL_DELAY - BALL_DURATION;
+            ballX = endX + Math.sin(idle * 0.55) * 14;
+            ballY = endY + Math.cos(idle * 0.38) * 7;
+            ballSpin += 0.007;
+          }
+
+          drawBall(ballX, ballY, ballSpin);
+        }
+
+        drawVignette();
+
+        animFrame = requestAnimationFrame(render);
+      }
+
+      const resizeObs = new ResizeObserver(() => resize());
+      resizeObs.observe(canvas.parentElement);
+      resize();
+      animFrame = requestAnimationFrame(render);
+
+      // Pause when hidden
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          cancelAnimationFrame(animFrame);
+        } else {
+          startTime = null;
+          animFrame = requestAnimationFrame(render);
+        }
+      });
+    })();
+
+    /* ── Scroll-triggered animations ─────────────────────── */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        const delay = parseInt(el.dataset.delay || '0', 10);
+        setTimeout(() => el.classList.add('visible'), delay);
+        observer.unobserve(el);
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.step, .drill-card, .card-copy, .card-display')
+      .forEach(el => observer.observe(el));
+
+    /* ── Player card stat counter ─────────────────────────── */
+    const cardObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        cardObserver.unobserve(entry.target);
+        animateCardStats();
+      });
+    }, { threshold: 0.4 });
+
+    const playerCardEl = document.getElementById('player-card-el');
+    if (playerCardEl) cardObserver.observe(playerCardEl);
+
+    function animateCardStats() {
+      const duration = 1200;
+      const start = performance.now();
+      const ratingEl = document.getElementById('rating-counter');
+      const statEls = document.querySelectorAll('.card-stat-val[data-target]');
+
+      function tick(now) {
+        const elapsed = now - start;
+        const progress = Math.min(1, elapsed / duration);
+        const ease = 1 - Math.pow(1 - progress, 3);
+
+        if (ratingEl) {
+          ratingEl.textContent = Math.round(72 * ease);
+        }
+
+        statEls.forEach(el => {
+          const target = parseInt(el.dataset.target, 10);
+          el.textContent = Math.round(target * ease);
+        });
+
+        if (progress < 1) requestAnimationFrame(tick);
+        else {
+          if (ratingEl) ratingEl.textContent = '72';
+          statEls.forEach(el => { el.textContent = el.dataset.target; });
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    /* ── Player card 3D tilt ──────────────────────────────── */
+    const card = document.getElementById('player-card-el');
+    if (card && window.matchMedia('(pointer: fine)').matches) {
+      const wrap = card.closest('.fifa-card-wrap');
+      wrap.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width  - 0.5;
+        const y = (e.clientY - rect.top)  / rect.height - 0.5;
+        card.style.transform = `perspective(700px) rotateY(${x * 18}deg) rotateX(${-y * 18}deg) scale(1.02)`;
+      });
+      wrap.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(700px) rotateY(0deg) rotateX(0deg) scale(1)';
+      });
+    }
+
+    /* ── Waitlist forms ───────────────────────────────────── */
+    function handleWaitlist(formId, onSuccess) {
+      const form = document.getElementById(formId);
+      if (!form) return;
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = form.querySelector('input[type="email"]').value.trim();
+        if (!email) return;
+
+        // In production: POST to your backend/Supabase
+        // For now, log and show success
+        console.log('Waitlist signup:', email);
+        onSuccess();
+      });
+    }
+
+    handleWaitlist('hero-waitlist', () => {
+      const form = document.getElementById('hero-waitlist');
+      form.innerHTML = '<p style="color: var(--emerald); font-family: var(--ff-mono); font-size:13px; letter-spacing:.08em;">✓ You\'re on the list. We\'ll be in touch.</p>';
+    });
+
+    handleWaitlist('cta-waitlist', () => {
+      document.getElementById('cta-forms-wrap').style.display = 'none';
+      const msg = document.getElementById('success-msg');
+      msg.classList.add('show');
+    });
+  </script>
+</body>
+</html>
