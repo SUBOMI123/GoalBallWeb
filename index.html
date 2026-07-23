@@ -336,6 +336,127 @@
       fill: none;
     }
 
+    /* ── Screenshots Section ───────────────────────────────── */
+    .screenshots-section {
+      background: var(--pitch-dark);
+      padding: 120px 0 0;
+      overflow: hidden;
+    }
+
+    .screenshots-header {
+      text-align: center;
+      padding: 0 24px;
+      margin-bottom: 72px;
+    }
+
+    .screenshots-header .section-title {
+      margin-bottom: 16px;
+    }
+
+    .screenshots-header p {
+      font-size: 17px;
+      color: var(--chalk-dim);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .screenshots-track-wrap {
+      position: relative;
+    }
+
+    .screenshots-track-wrap::before,
+    .screenshots-track-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 120px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .screenshots-track-wrap::before {
+      left: 0;
+      background: linear-gradient(to right, var(--pitch-dark), transparent);
+    }
+    .screenshots-track-wrap::after {
+      right: 0;
+      background: linear-gradient(to left, var(--pitch-dark), transparent);
+    }
+
+    .screenshots-track {
+      display: flex;
+      gap: 24px;
+      overflow-x: auto;
+      padding: 24px 80px 60px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      cursor: grab;
+    }
+    .screenshots-track::-webkit-scrollbar { display: none; }
+    .screenshots-track.grabbing { cursor: grabbing; }
+
+    .screenshot-item {
+      flex-shrink: 0;
+      width: 260px;
+      scroll-snap-align: center;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(237,245,232,0.06);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.55s ease, transform 0.55s ease, box-shadow 0.3s ease;
+    }
+
+    .screenshot-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .screenshot-item:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 36px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(59,122,252,0.25);
+    }
+
+    .screenshot-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+      pointer-events: none;
+    }
+
+    .screenshots-nav {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding-bottom: 80px;
+    }
+
+    .screenshots-nav-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--pitch-border);
+      background: rgba(237,245,232,0.05);
+      color: var(--chalk-dim);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      font-size: 18px;
+    }
+    .screenshots-nav-btn:hover {
+      background: var(--electric-bg);
+      border-color: var(--electric-dim);
+      color: var(--chalk);
+    }
+    .screenshots-nav-btn:focus-visible {
+      outline: 2px solid var(--electric);
+      outline-offset: 2px;
+    }
+
     /* ── Player Card Section ────────────────────────────────── */
     .card-section {
       background: var(--pitch-dark);
@@ -774,6 +895,10 @@
 
     /* ── Responsive ─────────────────────────────────────────── */
     @media (max-width: 900px) {
+      .screenshots-section { padding: 80px 0 0; }
+      .screenshot-item { width: 220px; }
+      .screenshots-track { padding: 20px 40px 48px; }
+
       .container { padding: 0 24px; }
       #nav { padding: 18px 24px; }
       .nav-links { display: none; }
@@ -829,6 +954,7 @@
     <a href="#" class="nav-logo" aria-label="GoalBall home">GOAL<em>BALL</em></a>
     <div class="nav-links">
       <a href="#how-it-works">How It Works</a>
+      <a href="#app-preview">The App</a>
       <a href="#player-card">Player Card</a>
       <a href="#training">Training</a>
       <a href="#early-access" class="nav-cta">Get Early Access</a>
@@ -900,6 +1026,49 @@
           <p>Receive grounded coaching notes, unlock harder drills as you improve, and watch your Player Card attributes climb. Every session pushes your overall rating forward.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ── Screenshots ─────────────────────────────────────── -->
+  <section class="screenshots-section" id="app-preview" aria-label="App screenshots">
+    <div class="screenshots-header">
+      <span class="eyebrow">The App</span>
+      <h2 class="section-title">EVERY SCREEN<br>BUILT FOR<br><span style="color:var(--electric)">PLAYERS.</span></h2>
+      <p>From your daily training plan to real-time AI feedback and a live Player Card — everything you need in one place.</p>
+    </div>
+
+    <div class="screenshots-track-wrap">
+      <div class="screenshots-track" id="screenshots-track" role="region" aria-label="Scrollable app screenshots">
+        <div class="screenshot-item" data-delay="0">
+          <img src="/images/screen-home.png" alt="GoalBall home screen showing today's session and weekly training plan" loading="lazy" width="260">
+        </div>
+        <div class="screenshot-item" data-delay="80">
+          <img src="/images/screen-activity.png" alt="Activity detail screen showing drill breakdown and coach feedback" loading="lazy" width="260">
+        </div>
+        <div class="screenshot-item" data-delay="160">
+          <img src="/images/screen-paths.png" alt="Ball Mastery skill path showing level progression" loading="lazy" width="260">
+        </div>
+        <div class="screenshot-item" data-delay="240">
+          <img src="/images/screen-explore.png" alt="Explore screen for browsing drills by skill category" loading="lazy" width="260">
+        </div>
+        <div class="screenshot-item" data-delay="320">
+          <img src="/images/screen-compete.png" alt="Compete screen showing leaderboards and standings" loading="lazy" width="260">
+        </div>
+        <div class="screenshot-item" data-delay="400">
+          <img src="/images/screen-calendar.png" alt="Progress screen showing activity calendar and streak" loading="lazy" width="260">
+        </div>
+        <div class="screenshot-item" data-delay="480">
+          <img src="/images/screen-progress.png" alt="Progress screen showing attribute radar chart and active paths" loading="lazy" width="260">
+        </div>
+        <div class="screenshot-item" data-delay="560">
+          <img src="/images/screen-playercard.png" alt="Player Card showing all 9 attributes and overall rating" loading="lazy" width="260">
+        </div>
+      </div>
+    </div>
+
+    <div class="screenshots-nav" aria-label="Screenshot navigation">
+      <button class="screenshots-nav-btn" id="ss-prev" aria-label="Previous screenshots">&#8592;</button>
+      <button class="screenshots-nav-btn" id="ss-next" aria-label="Next screenshots">&#8594;</button>
     </div>
   </section>
 
@@ -1438,6 +1607,57 @@
       const msg = document.getElementById('success-msg');
       msg.classList.add('show');
     });
+
+    /* ── Screenshots: animate in ──────────────────────────── */
+    (function() {
+      const items = document.querySelectorAll('.screenshot-item');
+      const ssObs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            const delay = parseInt(e.target.dataset.delay || 0);
+            setTimeout(() => e.target.classList.add('visible'), delay);
+            ssObs.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      items.forEach(el => ssObs.observe(el));
+    })();
+
+    /* ── Screenshots: drag-to-scroll ─────────────────────── */
+    (function() {
+      const track = document.getElementById('screenshots-track');
+      if (!track) return;
+      let isDown = false, startX = 0, scrollLeft = 0;
+
+      track.addEventListener('mousedown', e => {
+        isDown = true;
+        track.classList.add('grabbing');
+        startX = e.pageX - track.offsetLeft;
+        scrollLeft = track.scrollLeft;
+      });
+      window.addEventListener('mouseup', () => {
+        isDown = false;
+        track.classList.remove('grabbing');
+      });
+      track.addEventListener('mouseleave', () => {
+        isDown = false;
+        track.classList.remove('grabbing');
+      });
+      track.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - track.offsetLeft;
+        track.scrollLeft = scrollLeft - (x - startX) * 1.4;
+      });
+
+      const STEP = 300;
+      document.getElementById('ss-prev').addEventListener('click', () => {
+        track.scrollBy({ left: -STEP, behavior: 'smooth' });
+      });
+      document.getElementById('ss-next').addEventListener('click', () => {
+        track.scrollBy({ left: STEP, behavior: 'smooth' });
+      });
+    })();
   </script>
 </body>
 </html>
