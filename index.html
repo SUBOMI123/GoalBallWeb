@@ -142,7 +142,7 @@
       position: relative;
       width: 100%;
       height: 100svh;
-      min-height: 620px;
+      min-height: 680px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -170,10 +170,18 @@
     .hero-content {
       position: relative;
       z-index: 2;
-      text-align: center;
-      max-width: 860px;
-      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: clamp(40px, 6vw, 100px);
+      align-items: center;
+      max-width: 1100px;
+      width: 100%;
+      padding: 0 clamp(24px, 5vw, 60px);
       padding-top: 80px;
+    }
+
+    .hero-text {
+      /* left column */
     }
 
     .hero-eyebrow {
@@ -189,11 +197,11 @@
 
     .hero-title {
       font-family: var(--ff-display);
-      font-size: clamp(68px, 12vw, 148px);
+      font-size: clamp(56px, 9vw, 120px);
       line-height: 0.9;
       letter-spacing: 0.015em;
       color: var(--chalk);
-      margin-bottom: 32px;
+      margin-bottom: 28px;
       opacity: 0;
       animation: riseUp 0.8s 0.85s ease both;
     }
@@ -201,11 +209,11 @@
     .hero-title .accent { color: var(--electric); }
 
     .hero-body {
-      font-size: clamp(16px, 2vw, 19px);
+      font-size: clamp(15px, 1.6vw, 18px);
       line-height: 1.7;
       color: var(--chalk-dim);
-      max-width: 520px;
-      margin: 0 auto 40px;
+      max-width: 440px;
+      margin: 0 0 36px;
       opacity: 0;
       animation: riseUp 0.7s 1.1s ease both;
     }
@@ -213,7 +221,7 @@
     .hero-form {
       display: flex;
       gap: 10px;
-      justify-content: center;
+      justify-content: flex-start;
       flex-wrap: wrap;
       opacity: 0;
       animation: riseUp 0.7s 1.3s ease both;
@@ -262,6 +270,44 @@
       color: var(--chalk-ghost);
       opacity: 0;
       animation: riseUp 0.7s 1.5s ease both;
+    }
+
+    /* Hero phone mockup */
+    .hero-phone {
+      flex-shrink: 0;
+      opacity: 0;
+      animation: riseUp 0.9s 1.0s ease both;
+    }
+
+    .hero-phone-wrap {
+      width: clamp(200px, 22vw, 280px);
+      transform: rotate(4deg);
+      filter:
+        drop-shadow(0 40px 80px rgba(0,0,0,0.85))
+        drop-shadow(0 0 80px rgba(59,122,252,0.1));
+    }
+
+    .hero-phone-body {
+      background: #111115;
+      border-radius: 44px;
+      padding: 7px;
+      border: 1px solid rgba(255,255,255,0.13);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.04),
+        0 0 0 1px rgba(0,0,0,0.9);
+    }
+
+    .hero-phone-screen {
+      border-radius: 38px;
+      overflow: hidden;
+      background: #000;
+      line-height: 0;
+    }
+
+    .hero-phone-screen img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     /* ── How it works ───────────────────────────────────────── */
@@ -953,6 +999,17 @@
 
     /* ── Responsive ─────────────────────────────────────────── */
     @media (max-width: 900px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding-top: 100px;
+        padding-bottom: 48px;
+        justify-items: center;
+      }
+      .hero-body { margin: 0 auto 32px; }
+      .hero-form { justify-content: center; }
+      .hero-phone { display: none; }
+
       .app-features-header { margin-bottom: 60px; }
 
       .app-feature,
@@ -1034,30 +1091,40 @@
     <canvas id="hero-canvas" aria-hidden="true"></canvas>
     <div class="hero-overlay" aria-hidden="true"></div>
     <div class="hero-content">
-      <p class="hero-eyebrow">AI Football Coaching · Coming to iOS</p>
-      <h1 class="hero-title">
-        BECOME THE<br>PLAYER YOU<br><span class="accent">KNOW</span> YOU<br>CAN BE.
-      </h1>
-      <p class="hero-body">
-        GoalBall is the AI coach that watches every touch, reads your technique,
-        and builds a personalized training plan that grows with your game.
-      </p>
-      <form class="hero-form" id="hero-waitlist" novalidate>
-        <input type="email" placeholder="Enter your email" aria-label="Email address" required>
-        <button type="submit" class="btn-primary">Get Early Access</button>
-      </form>
-      <p class="hero-note">Free to start &nbsp;·&nbsp; No spam &nbsp;·&nbsp; Unsubscribe anytime</p>
+
+      <!-- Left: copy -->
+      <div class="hero-text">
+        <p class="hero-eyebrow">AI Football Coaching · Coming to iOS</p>
+        <h1 class="hero-title">
+          THE AI COACH<br>THAT WATCHES<br>EVERY <span class="accent">TOUCH.</span>
+        </h1>
+        <p class="hero-body">
+          Set up your phone, run the drill, get real feedback. GoalBall reads your
+          technique on-device and builds a training plan that grows with your game.
+        </p>
+        <form class="hero-form" id="hero-waitlist" novalidate>
+          <input type="email" placeholder="Enter your email" aria-label="Email address" required>
+          <button type="submit" class="btn-primary">Get Early Access</button>
+        </form>
+        <p class="hero-note">Free to start &nbsp;·&nbsp; No spam &nbsp;·&nbsp; Unsubscribe anytime</p>
+      </div>
+
+      <!-- Right: phone mockup -->
+      <div class="hero-phone" aria-hidden="true">
+        <div class="hero-phone-wrap">
+          <div class="hero-phone-body">
+            <div class="hero-phone-screen">
+              <img src="/images/ui-compete.png" alt="" loading="eager">
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
   <!-- ── App Feature Sections ─────────────────────────────── -->
   <section class="app-features-section" id="app-preview">
-
-    <div class="app-features-header">
-      <span class="eyebrow">The App</span>
-      <h2 class="section-title">BUILT FOR<br>THE WAY YOU<br><span style="color:var(--electric)">ACTUALLY</span><br>TRAIN.</h2>
-      <p>Three things that separate serious players from everyone else.</p>
-    </div>
 
     <!-- 1: Train tab -->
     <div class="app-feature">
