@@ -336,131 +336,167 @@
       fill: none;
     }
 
-    /* ── Screenshots Section ───────────────────────────────── */
-    .screenshots-section {
+    /* ── App Feature Sections ──────────────────────────────── */
+    .app-features-section {
       background: var(--pitch-dark);
-      padding: 120px 0;
-      overflow: hidden;
-      position: relative;
+      padding: 120px 0 0;
     }
 
-    .screenshots-section::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 50%; transform: translateX(-50%);
-      width: 600px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--electric-dim), transparent);
-    }
-
-    .screenshots-header {
+    .app-features-header {
       text-align: center;
       padding: 0 24px;
-      margin-bottom: 80px;
-      position: relative;
-      z-index: 2;
+      margin-bottom: 100px;
     }
 
-    .screenshots-header .section-title {
-      margin-bottom: 16px;
-    }
+    .app-features-header .section-title { margin-bottom: 16px; }
 
-    .screenshots-header p {
+    .app-features-header p {
       font-size: 17px;
       color: var(--chalk-dim);
       max-width: 480px;
       margin: 0 auto;
     }
 
-    /* Diagonal marquee container — the whole band is tilted */
-    .screenshots-band {
+    .app-feature {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(40px, 5vw, 80px);
+      align-items: center;
+      padding: 100px clamp(24px, 5vw, 80px);
+      border-top: 1px solid var(--pitch-border);
       position: relative;
-      transform: rotate(-5deg);
-      margin: 0 -8%;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      padding: 12px 0;
+      overflow: hidden;
     }
 
-    /* Fade masks at top and bottom of the band */
-    .screenshots-band::before,
-    .screenshots-band::after {
+    /* Radial glow — alternates sides */
+    .app-feature::before {
       content: '';
       position: absolute;
-      left: 0; right: 0;
-      height: 90px;
-      z-index: 2;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,122,252,0.06) 0%, transparent 65%);
+      left: -150px; top: 50%; transform: translateY(-50%);
       pointer-events: none;
     }
-    .screenshots-band::before {
-      top: 0;
-      background: linear-gradient(to bottom, var(--pitch-dark), transparent);
+    .app-feature.reverse::before { left: auto; right: -150px; }
+
+    /* Copy side */
+    .app-feature-copy {
+      opacity: 0;
+      transform: translateX(-32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
     }
-    .screenshots-band::after {
-      bottom: 0;
-      background: linear-gradient(to top, var(--pitch-dark), transparent);
+    .app-feature-copy.visible { opacity: 1; transform: translateX(0); }
+
+    .app-feature.reverse .app-feature-copy {
+      order: 2;
+      transform: translateX(32px);
+    }
+    .app-feature.reverse .app-feature-copy.visible { transform: translateX(0); }
+    .app-feature.reverse .app-feature-visual { order: 1; }
+
+    .af-kicker {
+      display: inline-block;
+      font-family: var(--ff-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--electric);
+      margin-bottom: 18px;
     }
 
-    /* Each row is an infinite marquee */
-    .marquee-row {
+    .app-feature-copy h3 {
+      font-family: var(--ff-display);
+      font-size: clamp(44px, 5vw, 68px);
+      line-height: 0.93;
+      letter-spacing: 0.02em;
+      color: var(--chalk);
+      margin-bottom: 20px;
+      text-wrap: balance;
+    }
+
+    .app-feature-copy h3 em {
+      font-style: normal;
+      color: var(--electric);
+    }
+
+    .app-feature-copy .af-lede {
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--chalk-dim);
+      max-width: 34ch;
+      margin-bottom: 0;
+    }
+
+    .af-bullets {
+      list-style: none;
+      margin: 28px 0 0;
+      padding: 0;
       display: flex;
-      gap: 18px;
-      overflow: hidden;
+      flex-direction: column;
+      gap: 14px;
     }
 
-    .marquee-inner {
+    .af-bullets li {
       display: flex;
-      gap: 18px;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      color: rgba(237,245,232,0.80);
+      font-weight: 500;
+    }
+
+    .af-bullets li .af-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--electric-bg);
+      border: 1px solid var(--electric-dim);
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      animation: marqueeLeft 36s linear infinite;
+      font-size: 14px;
     }
 
-    .marquee-row:nth-child(2) .marquee-inner {
-      animation: marqueeRight 42s linear infinite;
+    /* Visual side — the screenshot image */
+    .app-feature-visual {
+      display: flex;
+      justify-content: center;
+      opacity: 0;
+      transform: translateX(32px) translateY(16px);
+      transition: opacity 0.75s 0.18s ease, transform 0.75s 0.18s ease;
     }
+    .app-feature-visual.visible { opacity: 1; transform: translateX(0) translateY(0); }
 
-    @keyframes marqueeLeft {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
+    .app-feature.reverse .app-feature-visual {
+      transform: translateX(-32px) translateY(16px);
     }
-    @keyframes marqueeRight {
-      from { transform: translateX(-50%); }
-      to   { transform: translateX(0); }
-    }
+    .app-feature.reverse .app-feature-visual.visible { transform: translateX(0) translateY(0); }
 
-    /* Pause on hover */
-    .screenshots-band:hover .marquee-inner {
-      animation-play-state: paused;
-    }
-
-    .ss-card {
-      flex-shrink: 0;
-      width: 220px;
-      border-radius: 18px;
+    /* The screenshot image — no extra frame since App Store screenshots have one built in */
+    .af-img {
+      width: min(340px, 72vw);
+      border-radius: 16px;
       overflow: hidden;
       box-shadow:
-        0 20px 50px rgba(0,0,0,0.6),
-        0 0 0 1px rgba(237,245,232,0.07);
-      transition: transform 0.35s ease, box-shadow 0.35s ease;
-      cursor: pointer;
+        0 40px 100px rgba(0,0,0,0.7),
+        0 0 0 1px rgba(237,245,232,0.06);
+      transform: rotate(5deg);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
     }
 
-    .ss-card:hover {
-      transform: scale(1.06) translateY(-6px) rotate(1deg);
+    .af-img:hover {
+      transform: rotate(2deg) translateY(-10px);
       box-shadow:
-        0 32px 70px rgba(0,0,0,0.75),
-        0 0 0 1px rgba(59,122,252,0.4),
-        0 0 40px rgba(59,122,252,0.12);
-      z-index: 10;
-      position: relative;
+        0 56px 120px rgba(0,0,0,0.75),
+        0 0 0 1px rgba(59,122,252,0.18),
+        0 0 80px rgba(59,122,252,0.08);
     }
 
-    .ss-card img {
-      width: 100%;
-      height: auto;
+    .app-feature.reverse .af-img { transform: rotate(-5deg); }
+    .app-feature.reverse .af-img:hover { transform: rotate(-2deg) translateY(-10px); }
+
+    .af-img img {
+      width: 100%; height: auto;
       display: block;
-      pointer-events: none;
     }
 
     /* ── Player Card Section ────────────────────────────────── */
@@ -901,9 +937,20 @@
 
     /* ── Responsive ─────────────────────────────────────────── */
     @media (max-width: 900px) {
-      .screenshots-section { padding: 80px 0; }
-      .ss-card { width: 180px; }
-      .screenshots-band { margin: 0 -12%; }
+      .app-features-header { margin-bottom: 60px; }
+
+      .app-feature,
+      .app-feature.reverse {
+        grid-template-columns: 1fr;
+        padding: 64px 24px;
+        gap: 48px;
+      }
+      .app-feature.reverse .app-feature-copy,
+      .app-feature.reverse .app-feature-visual { order: initial; }
+      .app-feature-copy, .app-feature.reverse .app-feature-copy { transform: none; }
+      .app-feature-visual, .app-feature.reverse .app-feature-visual { transform: none; }
+      .af-img, .app-feature.reverse .af-img { transform: rotate(3deg); width: min(280px, 80vw); }
+      .af-img:hover, .app-feature.reverse .af-img:hover { transform: rotate(1deg) translateY(-6px); }
 
       .container { padding: 0 24px; }
       #nav { padding: 18px 24px; }
@@ -1035,48 +1082,72 @@
     </div>
   </section>
 
-  <!-- ── Screenshots ─────────────────────────────────────── -->
-  <section class="screenshots-section" id="app-preview" aria-label="App screenshots">
-    <div class="screenshots-header">
+  <!-- ── App Feature Sections ─────────────────────────────── -->
+  <section class="app-features-section" id="app-preview">
+
+    <div class="app-features-header">
       <span class="eyebrow">The App</span>
-      <h2 class="section-title">EVERY SCREEN<br>BUILT FOR<br><span style="color:var(--electric)">PLAYERS.</span></h2>
-      <p>From your daily training plan to real-time AI feedback and a live Player Card — everything you need in one place.</p>
+      <h2 class="section-title">BUILT FOR<br>THE WAY YOU<br><span style="color:var(--electric)">ACTUALLY</span><br>TRAIN.</h2>
+      <p>Three things that separate serious players from everyone else.</p>
     </div>
 
-    <!-- Diagonal auto-scrolling band — two rows, opposite directions -->
-    <div class="screenshots-band" aria-hidden="true">
-
-      <!-- Row 1 scrolls left — home, activity, paths, explore (×2 for loop) -->
-      <div class="marquee-row">
-        <div class="marquee-inner">
-          <div class="ss-card"><img src="/images/screen-home.png"     alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-activity.png" alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-paths.png"    alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-explore.png"  alt="" width="220" loading="lazy"></div>
-          <!-- duplicate for seamless loop -->
-          <div class="ss-card"><img src="/images/screen-home.png"     alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-activity.png" alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-paths.png"    alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-explore.png"  alt="" width="220" loading="lazy"></div>
+    <!-- 1: Train tab -->
+    <div class="app-feature">
+      <div class="app-feature-copy">
+        <span class="af-kicker">Daily Training</span>
+        <h3>YOUR PLAN.<br>EVERY<br><em>MORNING.</em></h3>
+        <p class="af-lede">The right session, the right drill, the right time — GoalBall lines it all up before you even open the app.</p>
+        <ul class="af-bullets">
+          <li><span class="af-icon">📅</span> Personalized daily sessions</li>
+          <li><span class="af-icon">⚡</span> Session score updates your rating</li>
+          <li><span class="af-icon">📈</span> 14-day trend so you see the arc</li>
+        </ul>
+      </div>
+      <div class="app-feature-visual">
+        <div class="af-img">
+          <img src="/images/screen-home.png" alt="GoalBall home screen showing today's training session" loading="lazy">
         </div>
       </div>
-
-      <!-- Row 2 scrolls right — compete, calendar, progress, playercard (×2 for loop) -->
-      <div class="marquee-row">
-        <div class="marquee-inner">
-          <div class="ss-card"><img src="/images/screen-compete.png"    alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-calendar.png"   alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-progress.png"   alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-playercard.png" alt="" width="220" loading="lazy"></div>
-          <!-- duplicate for seamless loop -->
-          <div class="ss-card"><img src="/images/screen-compete.png"    alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-calendar.png"   alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-progress.png"   alt="" width="220" loading="lazy"></div>
-          <div class="ss-card"><img src="/images/screen-playercard.png" alt="" width="220" loading="lazy"></div>
-        </div>
-      </div>
-
     </div>
+
+    <!-- 2: Paths (reversed) -->
+    <div class="app-feature reverse">
+      <div class="app-feature-copy">
+        <span class="af-kicker">Skill Paths</span>
+        <h3>EARN EACH<br>LEVEL.<br><em>UNLOCK</em><br>THE NEXT.</h3>
+        <p class="af-lede">Structured paths from sole rolls to advanced technique. Beat the pass mark, get certified, move up. No guessing what to work on next.</p>
+        <ul class="af-bullets">
+          <li><span class="af-icon">🎯</span> Ball Mastery, Dribbling, Shooting and more</li>
+          <li><span class="af-icon">✅</span> Certified levels with clear pass marks</li>
+          <li><span class="af-icon">🏆</span> Personal bests tracked per drill</li>
+        </ul>
+      </div>
+      <div class="app-feature-visual">
+        <div class="af-img">
+          <img src="/images/screen-paths.png" alt="Ball Mastery skill path showing certified levels" loading="lazy">
+        </div>
+      </div>
+    </div>
+
+    <!-- 3: Compete -->
+    <div class="app-feature">
+      <div class="app-feature-copy">
+        <span class="af-kicker">Competition</span>
+        <h3>TRAIN<br>HARDER<br>WHEN THEY<br><em>CAN SEE YOU.</em></h3>
+        <p class="af-lede">Follow friends, watch your rating climb the global standings, and see who owns the leaderboard on each individual drill.</p>
+        <ul class="af-bullets">
+          <li><span class="af-icon">🌍</span> Global and following standings</li>
+          <li><span class="af-icon">⚽</span> Per-drill leaderboards</li>
+          <li><span class="af-icon">👤</span> Public profile and activity feed</li>
+        </ul>
+      </div>
+      <div class="app-feature-visual">
+        <div class="af-img">
+          <img src="/images/screen-compete.png" alt="Compete screen showing leaderboards and standings" loading="lazy">
+        </div>
+      </div>
+    </div>
+
   </section>
 
   <!-- ── Player Card Section ───────────────────────────────── -->
@@ -1615,12 +1686,18 @@
       msg.classList.add('show');
     });
 
-    /* ── Screenshots: respect reduced-motion ─────────────── */
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.querySelectorAll('.marquee-inner').forEach(el => {
-        el.style.animationPlayState = 'paused';
-      });
-    }
+    /* ── App features: scroll-in ─────────────────────────── */
+    (function() {
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            obs.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.18 });
+      document.querySelectorAll('.app-feature-copy, .app-feature-visual').forEach(el => obs.observe(el));
+    })();
   </script>
 </body>
 </html>
