@@ -339,14 +339,26 @@
     /* ── Screenshots Section ───────────────────────────────── */
     .screenshots-section {
       background: var(--pitch-dark);
-      padding: 120px 0 0;
+      padding: 120px 0;
       overflow: hidden;
+      position: relative;
+    }
+
+    .screenshots-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 600px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--electric-dim), transparent);
     }
 
     .screenshots-header {
       text-align: center;
       padding: 0 24px;
-      margin-bottom: 72px;
+      margin-bottom: 80px;
+      position: relative;
+      z-index: 2;
     }
 
     .screenshots-header .section-title {
@@ -360,101 +372,95 @@
       margin: 0 auto;
     }
 
-    .screenshots-track-wrap {
+    /* Diagonal marquee container — the whole band is tilted */
+    .screenshots-band {
       position: relative;
+      transform: rotate(-5deg);
+      margin: 0 -8%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 12px 0;
     }
 
-    .screenshots-track-wrap::before,
-    .screenshots-track-wrap::after {
+    /* Fade masks at top and bottom of the band */
+    .screenshots-band::before,
+    .screenshots-band::after {
       content: '';
       position: absolute;
-      top: 0; bottom: 0;
-      width: 120px;
+      left: 0; right: 0;
+      height: 90px;
       z-index: 2;
       pointer-events: none;
     }
-    .screenshots-track-wrap::before {
-      left: 0;
-      background: linear-gradient(to right, var(--pitch-dark), transparent);
+    .screenshots-band::before {
+      top: 0;
+      background: linear-gradient(to bottom, var(--pitch-dark), transparent);
     }
-    .screenshots-track-wrap::after {
-      right: 0;
-      background: linear-gradient(to left, var(--pitch-dark), transparent);
+    .screenshots-band::after {
+      bottom: 0;
+      background: linear-gradient(to top, var(--pitch-dark), transparent);
     }
 
-    .screenshots-track {
+    /* Each row is an infinite marquee */
+    .marquee-row {
       display: flex;
-      gap: 24px;
-      overflow-x: auto;
-      padding: 24px 80px 60px;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      cursor: grab;
-    }
-    .screenshots-track::-webkit-scrollbar { display: none; }
-    .screenshots-track.grabbing { cursor: grabbing; }
-
-    .screenshot-item {
-      flex-shrink: 0;
-      width: 260px;
-      scroll-snap-align: center;
-      border-radius: 20px;
+      gap: 18px;
       overflow: hidden;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(237,245,232,0.06);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      opacity: 0;
-      transform: translateY(28px);
-      transition: opacity 0.55s ease, transform 0.55s ease, box-shadow 0.3s ease;
     }
 
-    .screenshot-item.visible {
-      opacity: 1;
-      transform: translateY(0);
+    .marquee-inner {
+      display: flex;
+      gap: 18px;
+      flex-shrink: 0;
+      animation: marqueeLeft 36s linear infinite;
     }
 
-    .screenshot-item:hover {
-      transform: translateY(-6px) scale(1.02);
-      box-shadow: 0 36px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(59,122,252,0.25);
+    .marquee-row:nth-child(2) .marquee-inner {
+      animation: marqueeRight 42s linear infinite;
     }
 
-    .screenshot-item img {
+    @keyframes marqueeLeft {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    @keyframes marqueeRight {
+      from { transform: translateX(-50%); }
+      to   { transform: translateX(0); }
+    }
+
+    /* Pause on hover */
+    .screenshots-band:hover .marquee-inner {
+      animation-play-state: paused;
+    }
+
+    .ss-card {
+      flex-shrink: 0;
+      width: 220px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.6),
+        0 0 0 1px rgba(237,245,232,0.07);
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+      cursor: pointer;
+    }
+
+    .ss-card:hover {
+      transform: scale(1.06) translateY(-6px) rotate(1deg);
+      box-shadow:
+        0 32px 70px rgba(0,0,0,0.75),
+        0 0 0 1px rgba(59,122,252,0.4),
+        0 0 40px rgba(59,122,252,0.12);
+      z-index: 10;
+      position: relative;
+    }
+
+    .ss-card img {
       width: 100%;
       height: auto;
       display: block;
       pointer-events: none;
-    }
-
-    .screenshots-nav {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      padding-bottom: 80px;
-    }
-
-    .screenshots-nav-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 1px solid var(--pitch-border);
-      background: rgba(237,245,232,0.05);
-      color: var(--chalk-dim);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s, border-color 0.2s, color 0.2s;
-      font-size: 18px;
-    }
-    .screenshots-nav-btn:hover {
-      background: var(--electric-bg);
-      border-color: var(--electric-dim);
-      color: var(--chalk);
-    }
-    .screenshots-nav-btn:focus-visible {
-      outline: 2px solid var(--electric);
-      outline-offset: 2px;
     }
 
     /* ── Player Card Section ────────────────────────────────── */
@@ -895,9 +901,9 @@
 
     /* ── Responsive ─────────────────────────────────────────── */
     @media (max-width: 900px) {
-      .screenshots-section { padding: 80px 0 0; }
-      .screenshot-item { width: 220px; }
-      .screenshots-track { padding: 20px 40px 48px; }
+      .screenshots-section { padding: 80px 0; }
+      .ss-card { width: 180px; }
+      .screenshots-band { margin: 0 -12%; }
 
       .container { padding: 0 24px; }
       #nav { padding: 18px 24px; }
@@ -1037,38 +1043,39 @@
       <p>From your daily training plan to real-time AI feedback and a live Player Card — everything you need in one place.</p>
     </div>
 
-    <div class="screenshots-track-wrap">
-      <div class="screenshots-track" id="screenshots-track" role="region" aria-label="Scrollable app screenshots">
-        <div class="screenshot-item" data-delay="0">
-          <img src="/images/screen-home.png" alt="GoalBall home screen showing today's session and weekly training plan" loading="lazy" width="260">
-        </div>
-        <div class="screenshot-item" data-delay="80">
-          <img src="/images/screen-activity.png" alt="Activity detail screen showing drill breakdown and coach feedback" loading="lazy" width="260">
-        </div>
-        <div class="screenshot-item" data-delay="160">
-          <img src="/images/screen-paths.png" alt="Ball Mastery skill path showing level progression" loading="lazy" width="260">
-        </div>
-        <div class="screenshot-item" data-delay="240">
-          <img src="/images/screen-explore.png" alt="Explore screen for browsing drills by skill category" loading="lazy" width="260">
-        </div>
-        <div class="screenshot-item" data-delay="320">
-          <img src="/images/screen-compete.png" alt="Compete screen showing leaderboards and standings" loading="lazy" width="260">
-        </div>
-        <div class="screenshot-item" data-delay="400">
-          <img src="/images/screen-calendar.png" alt="Progress screen showing activity calendar and streak" loading="lazy" width="260">
-        </div>
-        <div class="screenshot-item" data-delay="480">
-          <img src="/images/screen-progress.png" alt="Progress screen showing attribute radar chart and active paths" loading="lazy" width="260">
-        </div>
-        <div class="screenshot-item" data-delay="560">
-          <img src="/images/screen-playercard.png" alt="Player Card showing all 9 attributes and overall rating" loading="lazy" width="260">
+    <!-- Diagonal auto-scrolling band — two rows, opposite directions -->
+    <div class="screenshots-band" aria-hidden="true">
+
+      <!-- Row 1 scrolls left — home, activity, paths, explore (×2 for loop) -->
+      <div class="marquee-row">
+        <div class="marquee-inner">
+          <div class="ss-card"><img src="/images/screen-home.png"     alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-activity.png" alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-paths.png"    alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-explore.png"  alt="" width="220" loading="lazy"></div>
+          <!-- duplicate for seamless loop -->
+          <div class="ss-card"><img src="/images/screen-home.png"     alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-activity.png" alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-paths.png"    alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-explore.png"  alt="" width="220" loading="lazy"></div>
         </div>
       </div>
-    </div>
 
-    <div class="screenshots-nav" aria-label="Screenshot navigation">
-      <button class="screenshots-nav-btn" id="ss-prev" aria-label="Previous screenshots">&#8592;</button>
-      <button class="screenshots-nav-btn" id="ss-next" aria-label="Next screenshots">&#8594;</button>
+      <!-- Row 2 scrolls right — compete, calendar, progress, playercard (×2 for loop) -->
+      <div class="marquee-row">
+        <div class="marquee-inner">
+          <div class="ss-card"><img src="/images/screen-compete.png"    alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-calendar.png"   alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-progress.png"   alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-playercard.png" alt="" width="220" loading="lazy"></div>
+          <!-- duplicate for seamless loop -->
+          <div class="ss-card"><img src="/images/screen-compete.png"    alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-calendar.png"   alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-progress.png"   alt="" width="220" loading="lazy"></div>
+          <div class="ss-card"><img src="/images/screen-playercard.png" alt="" width="220" loading="lazy"></div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -1608,56 +1615,12 @@
       msg.classList.add('show');
     });
 
-    /* ── Screenshots: animate in ──────────────────────────── */
-    (function() {
-      const items = document.querySelectorAll('.screenshot-item');
-      const ssObs = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            const delay = parseInt(e.target.dataset.delay || 0);
-            setTimeout(() => e.target.classList.add('visible'), delay);
-            ssObs.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0.15 });
-      items.forEach(el => ssObs.observe(el));
-    })();
-
-    /* ── Screenshots: drag-to-scroll ─────────────────────── */
-    (function() {
-      const track = document.getElementById('screenshots-track');
-      if (!track) return;
-      let isDown = false, startX = 0, scrollLeft = 0;
-
-      track.addEventListener('mousedown', e => {
-        isDown = true;
-        track.classList.add('grabbing');
-        startX = e.pageX - track.offsetLeft;
-        scrollLeft = track.scrollLeft;
+    /* ── Screenshots: respect reduced-motion ─────────────── */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll('.marquee-inner').forEach(el => {
+        el.style.animationPlayState = 'paused';
       });
-      window.addEventListener('mouseup', () => {
-        isDown = false;
-        track.classList.remove('grabbing');
-      });
-      track.addEventListener('mouseleave', () => {
-        isDown = false;
-        track.classList.remove('grabbing');
-      });
-      track.addEventListener('mousemove', e => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - track.offsetLeft;
-        track.scrollLeft = scrollLeft - (x - startX) * 1.4;
-      });
-
-      const STEP = 300;
-      document.getElementById('ss-prev').addEventListener('click', () => {
-        track.scrollBy({ left: -STEP, behavior: 'smooth' });
-      });
-      document.getElementById('ss-next').addEventListener('click', () => {
-        track.scrollBy({ left: STEP, behavior: 'smooth' });
-      });
-    })();
+    }
   </script>
 </body>
 </html>
